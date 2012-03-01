@@ -24,6 +24,8 @@
 
 @synthesize managedObjectContext;
 
+@synthesize locationManager;
+
 - (void)viewWillAppear:(BOOL)animated {
 	
 }
@@ -475,20 +477,38 @@
 						   otherButtonTitles:NSLocalizedString(@"Add Bookmark", @"Add Bookmark"), nil];
 
 	menu.actionSheetStyle = UIActionSheetStyleDefault;
+    [menu setTag:0];
 	[menu showInView:self.view];
         [menu release];
 }
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(int)buttonIndex
 {		
-	if(buttonIndex == 0)
-	{
-		pageTitle = [self.webView stringByEvaluatingJavaScriptFromString:@"document.title"]; 
-		
-		if (pageTitle != nil) {
-			[self addBookmark:pageTitle];
-		}
-	}
+    switch ( actionSheet.tag )
+    {
+        case 0: 
+            if(buttonIndex == 0)
+            {
+                pageTitle = [self.webView stringByEvaluatingJavaScriptFromString:@"document.title"]; 
+                
+                if (pageTitle != nil) {
+                    [self addBookmark:pageTitle];
+                }
+            }
+            break;
+        case 1:
+            if (buttonIndex == actionSheet.cancelButtonIndex) { return; }
+            abuseBatteryBug = buttonIndex;
+            if (buttonIndex == 1)
+            {
+                [locationManager startUpdatingLocation];
+            }
+            else
+            {
+                [locationManager stopUpdatingLocation];
+            }
+            break;
+    }
 }
 
 
@@ -518,6 +538,29 @@
 	if (webView.loading) {
 		[webView stopLoading];
 	}
+}
+
+- (IBAction)selectBugButton {
+    UIActionSheet *sheet = [[UIActionSheet alloc]
+                            initWithTitle:@"Select the bug to inject:"
+                            delegate:self
+                            cancelButtonTitle:nil
+                            destructiveButtonTitle:nil
+                            otherButtonTitles:nil];
+   
+    if (abuseBatteryBug == 0) { [sheet addButtonWithTitle:@"[CPU]"]; }
+    else { [sheet addButtonWithTitle:@"CPU"]; }
+    
+    if (abuseBatteryBug == 1) { [sheet addButtonWithTitle:@"[GPS]"]; }
+    else { [sheet addButtonWithTitle:@"GPS"]; }
+    
+    if (abuseBatteryBug == 2) { [sheet addButtonWithTitle:@"[Radio]"]; }
+	else { [sheet addButtonWithTitle:@"Radio"]; } 
+    [sheet addButtonWithTitle:@"Cancel"];
+    sheet.cancelButtonIndex = sheet.numberOfButtons-1;
+    [sheet setTag:1];
+    [sheet showFromRect:self.view.bounds inView:self.view animated:YES];
+	[sheet release];
 }
 
 - (void)reload {
@@ -570,6 +613,7 @@
 - (void)dealloc {
     [super dealloc];
 	[webView release];
+    [locationManager dealloc];
     self.externalURL = nil;
 }
 

@@ -10,6 +10,7 @@
 #import "SBJson.h"
 #import "MBProgressHUD.h"
 #import "WikiWebView.h"
+#import <CoreLocation/CoreLocation.h>
 
 @interface RootViewController : UIViewController <UISearchBarDelegate, UIWebViewDelegate, UIActionSheetDelegate, UITableViewDelegate, UITableViewDataSource, MBProgressHUDDelegate> {
 	Wikipedia_MobileAppDelegate *appDelegate;
@@ -31,6 +32,7 @@
 	NSMutableArray *searchResults;
 	NSManagedObjectContext *managedObjectContext;
     BOOL _isDataSourceAvailable;
+    CLLocationManager *locationManager;
 }
 
 @property (nonatomic, retain) Wikipedia_MobileAppDelegate *appDelegate;
@@ -47,6 +49,7 @@
 
 @property (nonatomic, retain) NSMutableArray *searchResults;
 @property (nonatomic, retain) NSManagedObjectContext *managedObjectContext;	
+@property (nonatomic, retain) CLLocationManager *locationManager;
 
 - (void)loadWikiEntry:(NSString *)url;
 - (void)loadURL:(NSString *)url;
@@ -54,6 +57,7 @@
 - (IBAction)goBack;
 - (IBAction)goForward;
 - (IBAction)nearbyButton;
+- (IBAction)selectBugButton;
 - (IBAction)addBookmark;
 - (IBAction)showHistory;
 - (IBAction)stopEditing;

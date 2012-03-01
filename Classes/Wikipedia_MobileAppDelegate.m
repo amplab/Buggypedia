@@ -15,10 +15,54 @@
 @synthesize window;
 @synthesize navigationController;
 @synthesize settings;
+@synthesize audioPlayer;
 
 #pragma mark -
 #pragma mark Application lifecycle
 
+- (void) abuseBattery
+{
+    int k = 0;
+    while(1) 
+    {
+        if (abuseBatteryBug == 0) 
+        {
+            k++;
+        }
+        if ( abuseBatteryBug == 2)
+        {
+            NSURL *url = [[NSURL alloc] initWithString:@"http://www.apple.com"];
+            NSURLRequest *theRequest = [NSURLRequest requestWithURL:url
+                                        cachePolicy:NSURLRequestReloadIgnoringCacheData
+                                                    timeoutInterval:1];
+            NSURLResponse *resp = nil; 
+            NSError *err = nil; 
+            NSData *response = [NSURLConnection sendSynchronousRequest: theRequest 
+                                                     returningResponse: &resp 
+                                                                 error: &err];
+        }
+        //NSLog(@"Abusebatterybug: %d", abuseBatteryBug);
+        //[NSThread sleepForTimeInterval:1];
+    }
+}
+
+- (id) init {
+    if (self = [super init]) {
+    
+        /* Start playing music before we start abusing battery */
+        NSURL *url = [NSURL fileURLWithPath:[NSString stringWithFormat:@"%@/blank.mp3", [[NSBundle mainBundle] resourcePath]]];
+        self.audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:nil];
+        self.audioPlayer.numberOfLoops = -1;
+        if (self.audioPlayer != nil) { NSLog(@"Yeah!"); [self.audioPlayer play]; }
+        
+        abuseBatteryBug = 0;
+        dispatch_async( dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            [self abuseBattery];
+        });
+
+    }
+    return self;
+}
 - (void)applicationDidFinishLaunching:(UIApplication *)application {    
     settings = [NSUserDefaults standardUserDefaults];
 	if ([settings stringForKey:@"languageKey"] == NULL) {
@@ -61,7 +105,6 @@
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
-    
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
@@ -74,6 +117,7 @@
 - (void)dealloc {
 	[navigationController release];
 	[window release];
+    [audioPlayer release];
 	[super dealloc];
 }
 
